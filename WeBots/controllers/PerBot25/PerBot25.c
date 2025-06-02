@@ -296,16 +296,18 @@ int main() {
     const unsigned char *img = wb_camera_get_image(cam);
     int width  = wb_camera_get_width(cam);
     int height = wb_camera_get_height(cam);
+    
+    // inside the “LAP == 1” block, after reading camera:
 
+    // 1) compute rawError ∈ [−blackCount … +blackCount]:
+    double rawError = 0.0;
+    int blackCount = 0;
     int red = 0;
-    int LB1 = 0, LB2 = 0, LB3 = 0, LB4 = 0;
-    int LW1 = 0, LW2 = 0, LW3 = 0, LW4 = 0;
-    int RB1 = 0, RB2 = 0, RB3 = 0, RB4 = 0;
-    int RW1 = 0, RW2 = 0, RW3 = 0, RW4 = 0;
-
-    int x0 = 0, x1 = 104, y0 = height - 20;
+    int threshold = 80;  // “black” threshold
+    int midX = 52;
+    int y0 = height - 25;
     for (int y = y0; y < height; y++) {
-      for (int x = x0; x < x1; x++) {
+      for (int x = 0; x < width; x++) {
         int r = wb_camera_image_get_red(img,   width, x, y);
         int g = wb_camera_image_get_green(img, width, x, y);
         int b = wb_camera_image_get_blue(img,  width, x, y);
@@ -314,77 +316,38 @@ int main() {
           if (x > width/2 - 10 && x < width/2 + 10 && y > 65)
             red++;
         }
-        // BLACK pixels
-        else if (r < 150 && g < 150 && b < 150) {
-          if      (x < 13) LB4++;
-          else if (x < 26) LB3++;
-          else if (x < 39) LB2++;
-          else if (x < 52) LB1++;
-          else if (x < 65) RB1++;
-          else if (x < 78) RB2++;
-          else if (x < 91) RB3++;
-          else             RB4++;
+        else if (r < threshold && g < threshold && b < threshold) {
+          int sign = (x < midX) ? -1.0 : +1.0;
+          rawError += sign;
+          blackCount++;
         }
-        // WHITE pixels
-        else if (r > 150 && g > 150 && b > 150) {
-          if      (x < 13) LW4++;
-          else if (x < 26) LW3++;
-          else if (x < 39) LW2++;
-          else if (x < 52) LW1++;
-          else if (x < 65) RW1++;
-          else if (x < 78) RW2++;
-          else if (x < 91) RW3++;
-          else             RW4++;
-        }
+        
+        
       }
     }
-
-    // (c) Decision: continuous P‐control
     double vl_cmd = 0.0, vr_cmd = 0.0;
-    printf("L‐white total = %d\n", LW4 + LW3 + LW2 + LW1);
-
     if (red > 0) {
       // STOP immediately if red line
       printf("RED detected → STOP\n");
       vl_cmd = vr_cmd = 0.0;
-    }
-    else {
-      int totalBlack = LB4 + LB3 + LB2 + LB1 + RB1 + RB2 + RB3 + RB4;
-      int totalWhite = LW4 + LW3 + LW2 + LW1 + RW1 + RW2 + RW3 + RW4;
+    } else{
+    // Normalize to [−1 … +1]:
+    double error = (blackCount > 0) ? (rawError / (double)blackCount) : 0.0;
 
-      if (totalBlack + totalWhite == 0) {
-        // no line data → just go straight
-        vl_cmd = vr_cmd = FORWARD_SPEED;
-      } else {
-        // compute black “centroid” in [−4..+4]
-        double num = 0.0;
-        num += (-4.0) * LB4;
-        num += (-3.0) * LB3;
-        num += (-2.0) * LB2;
-        num += (-1.0) * LB1;
-        num += (+1.0) * RB1;
-        num += (+2.0) * RB2;
-        num += (+3.0) * RB3;
-        num += (+4.0) * RB4;
-        double blackCentroid = (totalBlack > 0)
-                                ? (num / (double)totalBlack)
-                                : 0.0;
-        // normalized error in [−1..+1]
-        double error = blackCentroid / 4.0;
-        
-        // simple P‐gain
-        const double Kp = 7.0;  
-        double turn = Kp * error;
-        if (totalBlack > 2000) turn = 5;
-        // compute wheel speeds (clamp to ±FORWARD_SPEED if needed)
-        vl_cmd = FORWARD_SPEED - turn;
-        vr_cmd = FORWARD_SPEED + turn;
-        if (vl_cmd > FORWARD_SPEED)  vl_cmd = FORWARD_SPEED;
-        if (vl_cmd < -FORWARD_SPEED) vl_cmd = -FORWARD_SPEED;
-        if (vr_cmd > FORWARD_SPEED)  vr_cmd = FORWARD_SPEED;
-        if (vr_cmd < -FORWARD_SPEED) vr_cmd = -FORWARD_SPEED;
-        
-      }
+    // 2) apply a proportional gain (you could add I or D later)
+    const double Kp = 8.0;  // start here; if too timid, raise to 5 or 6; if too twitchy, lower to 2 or 3.
+    double turn = Kp * error;
+
+    // 3) compute wheel speeds
+    double base = FORWARD_SPEED;
+    vl_cmd = base - turn;
+    vr_cmd = base + turn;
+
+    // clamp them so they never exceed ±base
+    if (vl_cmd >  base) vl_cmd =  base;
+    if (vl_cmd < -base) vl_cmd = -base;
+    if (vr_cmd >  base) vr_cmd =  base;
+    if (vr_cmd < -base) vr_cmd = -base;
     }
 
     // (d) Command motors and log
