@@ -3,13 +3,12 @@
 EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2023b/projects/objects/backgrounds/protos/TexturedBackground.proto"
 EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2023b/projects/objects/backgrounds/protos/TexturedBackgroundLight.proto"
 EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2023b/projects/objects/floors/protos/RectangleArena.proto"
-EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2025a/projects/robots/gctronic/e-puck/protos/E-puck.proto"
 
 WorldInfo {
 }
 Viewpoint {
-  orientation 0.29706136665185806 -0.4683554713397932 -0.832104378614252 4.980595900587645
-  position -0.7292690196101743 -1.4323077763195478 1.061817203831731
+  orientation 0.31777576717019956 -0.3858237096061955 -0.8661169822287894 4.762658144728879
+  position -0.6398076785680207 -3.648114668264234 3.188581163319952
 }
 TexturedBackground {
 }
@@ -72,7 +71,7 @@ Transform {
   ]
 }
 Solid {
-  translation 0.45 -0.73 0.05
+  translation 0.452584 -0.739654 0.05
   rotation 0 0 1 0.261799
   children [
     Shape {
@@ -88,7 +87,7 @@ Solid {
   ]
 }
 Solid {
-  translation 0.666748 -0.198009 0.05
+  translation 0.686067 -0.203185 0.05
   rotation 0 0 -1 -1.3089953071795861
   children [
     Shape {
@@ -105,7 +104,7 @@ Solid {
   name "solid(1)"
 }
 Solid {
-  translation 0.36358 0.381911 0.05
+  translation 0.35858 0.373246 0.05
   rotation 0 0 -1 -1.047195307179586
   children [
     Shape {
@@ -122,7 +121,7 @@ Solid {
   name "solid(3)"
 }
 Solid {
-  translation -0.380764 0.661551 0.05
+  translation -0.385764 0.670212 0.05
   rotation 0 0 1 2.09439
   children [
     Shape {
@@ -139,7 +138,7 @@ Solid {
   name "solid(4)"
 }
 Solid {
-  translation -0.545793 -0.0756207 0.05
+  translation -0.536131 -0.0730309 0.05
   rotation 0 0 1 1.83259
   children [
     Shape {
@@ -172,9 +171,224 @@ Solid {
   ]
   name "solid(6)"
 }
-E-puck {
-  translation -0.45 -0.5 0
+Robot {
+  translation -0.35 -0.45 -0.000477917
+  rotation 0 0 1 1.5707996938995747
+  children [
+    InertialUnit {
+      translation 0 0 0.04
+      rotation 0 0 1 -1.5708003061004252
+    }
+    DEF support BallJoint {
+      jointParameters BallJointParameters {
+        position 1346.8927898666586
+        anchor 0 0.035 0.01
+      }
+      jointParameters2 JointParameters {
+        position -169.736275149649
+      }
+      jointParameters3 JointParameters {
+        position 850.7561091140093
+        axis 0 1 0
+      }
+      endPoint Solid {
+        translation -9.643040000006637e-06 0.03500000000000001 0.009999999999999998
+        rotation 0.7727519536082093 0.6211793822481416 -0.13034796992862321 3.0558362315587173
+        children [
+          DEF support_sphere Shape {
+            appearance PBRAppearance {
+              baseColor 0 0 0
+              roughness 1
+              metalness 0
+            }
+            geometry Sphere {
+              radius 0.01
+            }
+          }
+        ]
+        name "solid(4)"
+        boundingObject USE support_sphere
+        physics Physics {
+          mass 0.5
+        }
+      }
+    }
+    DEF support BallJoint {
+      jointParameters BallJointParameters {
+        position -1703.9469642344745
+        anchor 0 -0.035 0.01
+      }
+      jointParameters2 JointParameters {
+        position -19.12424394406779
+      }
+      jointParameters3 JointParameters {
+        position 961.7940834309402
+        axis 0 1 0
+      }
+      endPoint Solid {
+        translation -7.274389999996602e-06 -0.03500000000000001 0.009999999999999998
+        children [
+          USE support_sphere
+        ]
+        name "solid(5)"
+        boundingObject USE support_sphere
+        physics Physics {
+          mass 0.5
+        }
+      }
+    }
+    Camera {
+      translation 0 -0.037 0.03
+      rotation 0 0 -1 1.57
+      children [
+        Solid {
+          translation 0.002 0 0
+          rotation 0 1 0 1.57
+          children [
+            Shape {
+              appearance PBRAppearance {
+                baseColor 1 1 0
+                roughness 1
+                metalness 0
+              }
+              geometry Cylinder {
+                height 0.01
+                radius 0.005
+              }
+            }
+          ]
+        }
+      ]
+      fieldOfView 0.84
+      width 104
+      height 78
+      lens Lens {
+      }
+      focus Focus {
+      }
+      recognition Recognition {
+      }
+    }
+    DEF Body Pose {
+      translation 0 0 0.043
+      children [
+        Shape {
+          appearance PBRAppearance {
+            baseColor 0 0 1
+            roughness 1
+            metalness 0
+          }
+          geometry Cylinder {
+            height 0.08
+            radius 0.045
+          }
+        }
+      ]
+    }
+    DEF left_wheel HingeJoint {
+      jointParameters HingeJointParameters {
+        position 3713.9484589745516
+        anchor 0.045 0 0.025
+      }
+      device [
+        PositionSensor {
+          name "left wheel sensor"
+        }
+        RotationalMotor {
+          name "left wheel motor"
+        }
+      ]
+      endPoint Solid {
+        translation 0.045 0 0.025
+        rotation -0.2725629593786051 -0.9194505483101798 -0.28340804926269547 4.633239064740063
+        children [
+          DEF wheel Shape {
+            appearance PBRAppearance {
+              baseColor 1 0 0
+              roughness 1
+              metalness 0
+            }
+            geometry Cylinder {
+              height 0.01
+              radius 0.025
+            }
+          }
+        ]
+        boundingObject USE wheel
+        physics Physics {
+        }
+      }
+    }
+    DEF right_wheel HingeJoint {
+      jointParameters HingeJointParameters {
+        position 7056.797158241221
+        anchor -0.045 0 0.025
+      }
+      device [
+        PositionSensor {
+          name "right wheel sensor"
+        }
+        RotationalMotor {
+          name "right wheel motor"
+        }
+      ]
+      endPoint DEF wheel Solid {
+        translation -0.045 0 0.025
+        rotation 0.3606237737922012 0.8646552757073137 0.3497452615367084 1.7159305021804263
+        children [
+          DEF wheel_2 Shape {
+            appearance PBRAppearance {
+              baseColor 1 0 0
+              roughness 1
+              metalness 0
+            }
+            geometry Cylinder {
+              height 0.01
+              radius 0.025
+            }
+          }
+        ]
+        name "solid(1)"
+        boundingObject USE wheel_2
+        physics Physics {
+        }
+      }
+    }
+    Solid {
+      translation 0.015 -0.045 0.07
+      children [
+        DEF eye Shape {
+          appearance PBRAppearance {
+            baseColor 1 0 0
+            roughness 1
+            metalness 0
+          }
+          geometry Box {
+            size 0.001 0.005 0.005
+          }
+        }
+      ]
+      name "solid(2)"
+    }
+    Solid {
+      translation -0.015 -0.045 0.07
+      children [
+        USE eye
+      ]
+      name "solid(3)"
+    }
+  ]
+  boundingObject USE Body
+  physics Physics {
+    density -1
+    mass 0.5089380098815466
+    centerOfMass [
+      0 0 0.041499999999999995
+    ]
+    inertiaMatrix [
+      0.001405601960291185 0.001405601960291185 0.0005152997350050659
+      0 0 0
+    ]
+  }
   controller "PerBot25"
-  camera_width 104
-  camera_height 78
 }
